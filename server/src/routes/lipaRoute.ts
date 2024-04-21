@@ -1,6 +1,6 @@
 import express from "express";
-import { generateToken } from "../middlewares/generateToken";
 import { handleStkPush } from "../controllers/stkController";
+import { generateToken } from "../middlewares/generateToken";
 const router = express.Router();
-router.post("/stk", handleStkPush);
+router.post("/stkpush", generateToken, handleStkPush);
 export default router;
