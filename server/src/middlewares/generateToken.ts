@@ -1,8 +1,13 @@
 import axios from "axios";
-import dotenv from "dotenv";
-dotenv.config();
+import { NextFunction, Request, Response } from "express";
 
-const generateToken = async () => {
+export type RequestExtended = Request & { token?: string };
+
+export const generateToken = async (
+  req: RequestExtended,
+  _res: Response,
+  next: NextFunction
+) => {
   const CONSUMER_KEY = process.env.MPESA_CONSUMER_KEY as string;
   const CONSUMER_SECRET = process.env.MPESA_CONSUMER_SECRET as string;
   const URL =
@@ -11,20 +16,16 @@ const generateToken = async () => {
   const auth = Buffer.from(`${CONSUMER_KEY}:${CONSUMER_SECRET}`).toString(
     "base64"
   );
-  console.log("Basic auth", auth);
+
   try {
     const response = await axios(URL, {
       headers: {
         Authorization: `Basic ${auth}`,
       },
     });
-    console.log(response.data.access_token);
-    return response.data.access_token;
-    // res.status(200).json({ message: "Success", data: response.data });
-    // next();
-  } catch (error) {
-    console.log(error);
+    req.token = response.data.access_token;
+    next();
+  } catch (error: any) {
+    throw new Error(`Failed to generate access token: ${error.message}`);
   }
 };
-
-export { generateToken };
